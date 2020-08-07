@@ -1,0 +1,11 @@
+public class AssetTriggerHandler extends TriggerHandler{
+		protected override void afterInsert(){
+        countAsset((List<Asset__c>)Trigger.new);
+    }
+    	protected override void afterDelete(){
+        countAsset((List<Asset__c>)Trigger.new);
+    }
+      private static void countAsset(List<Asset__c> newList){
+        Database.executeBatch(new CountAssetBatch(), 50);
+    }
+}
