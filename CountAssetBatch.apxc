@@ -1,0 +1,25 @@
+public class CountAssetBatch implements Database.Batchable<SObject> {
+    
+    public Database.QueryLocator start(Database.BatchableContext context){
+         return Database.getQueryLocator([SELECT Id from Account order by Name]);
+    }
+        
+        public void execute(Database.BatchableContext context, List<Account> scope){
+          List<Account> updates = new List<Account> ();
+        for (AggregateResult ar : [
+                SELECT AccountId__c a, count(Id) c
+                FROM Asset__c
+                WHERE AccountId__c in :scope
+                GROUP BY AccountId__c
+                ]) {
+            updates.add(new Account(
+                    Id = (Id) ar.get('a'),
+                    Asset_Count__c = (Decimal) ar.get('c')
+                    ));
+        }
+        update updates;
+    }
+
+    public void finish(Database.BatchableContext context) {
+    }
+}
