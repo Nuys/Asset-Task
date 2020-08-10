@@ -8,7 +8,7 @@ public class AssetTriggerTest {
             Asset__c newAsset = new Asset__c(AccountId__c = newAcc.Id);
             assetList.add(newAsset);
         }
-        
+       
         insert assetList;
         Set<Id> newSet = new Set<Id> ();
         for(Asset__c asse_i:assetList){
@@ -23,6 +23,32 @@ public class AssetTriggerTest {
         Test.stopTest();
        Account testAccount = [SELECT Id,Asset_Count__c FROM Account WHERE Id=:newAcc.Id LIMIT 1];
         System.assertEquals(10, testAccount.Asset_Count__c);
+     
     }
-
+    @isTest private static void countAssetAfterDelete(){
+        Account newAcc = new Account (Name='Test');
+        insert newAcc;
+        List<Asset__c> assetList = new List<Asset__c>();
+        for(Integer i = 0 ; i < 10; i++){
+            Asset__c newAsset = new Asset__c(AccountId__c = newAcc.Id);
+            assetList.add(newAsset);
+        }
+       
+        insert assetList;
+        delete assetList[0];
+        Set<Id> newSet = new Set<Id> ();
+        for(Asset__c asse_i:assetList){
+            newSet.add(asse_i.AccountId__c);
+        }
+       
+        Test.startTest();
+       
+        CountAssetBatch cauntAsset = new CountAssetBatch(newSet);
+        Database.executeBatch(cauntAsset);
+        
+        Test.stopTest();
+        
+         Account testAccount = [SELECT Id,Asset_Count__c FROM Account WHERE Id=:newAcc.Id LIMIT 1];
+        System.assertEquals(9, testAccount.Asset_Count__c);
+    }
 }
