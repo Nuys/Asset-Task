@@ -2,10 +2,16 @@ public class AssetTriggerHandler extends TriggerHandler{
 		protected override void afterInsert(){
         countAsset((List<Asset__c>)Trigger.new);
     }
-    	protected override void afterDelete(){
-        countAsset((List<Asset__c>)Trigger.new);
+    	protected override void beforeDelete(){
+        countAsset((List<Asset__c>)Trigger.old);
     }
+    @testVisible
       private static void countAsset(List<Asset__c> newList){
-        Database.executeBatch(new CountAssetBatch(), 50);
+          Set<Id> idSet = new Set<Id>();
+          for(Asset__c asset_i:newList){
+              idSet.add(asset_i.AccountId__c);
+          }
+         
+        Database.executeBatch(new CountAssetBatch(idSet),50);
     }
 }
